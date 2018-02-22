@@ -1,0 +1,24 @@
+{
+  "name": "chat-back",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asconwe/chat-back.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asconwe/chat-back/issues"
+  },
+  "homepage": "https://github.com/asconwe/chat-back#readme"
+}
