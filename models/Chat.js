@@ -4,7 +4,6 @@ const { adminSchema } = require('./Admin');
 
 const chatSchema = mongoose.Schema({
     endUserName: String,
-    admin: [mongoose.Schema.ObjectId],
     messages: [{ author: String, date: Date, message: String }]
 })
 

@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
 
 const { chatSchema } = require('./Chat');
-const { adminSchema } = require('./Admin');
+const { repSchema } = require('./Rep')
 
 const siteSchema = mongoose.Schema({
     name: String,
     address: String,
-    chats: [mongoose.Schema.ObjectId],
-    admins: [mongoose.Schema.ObjectId]
+    chats: [chatSchema],
+    admins: [repSchema],
+    reps: [repSchema]
 })
 
 const Site = mongoose.model('Site', siteSchema);
