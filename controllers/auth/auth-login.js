@@ -30,12 +30,9 @@ module.exports = (app) => {
                 errors: validationResult.errors
             });
         }
-
-
-        return passport.authenticate(LOCAL_LOGIN, (err, rep) => {
+        const authenticateWithLocalStrategy =  passport.authenticate(LOCAL_LOGIN, (err, rep) => {
             // Authentication failed
             if (err) {
-                console.error(err)
                 return res.status(409).json({
                     success: false,
                     message: 'There was an issue accessing the database, please try again later'
@@ -55,7 +52,8 @@ module.exports = (app) => {
                     message: 'You are logged in'
                 });
             });
-        })(req, res, next);
+        })
+        return authenticateWithLocalStrategy(req, res, next);
     });
 };
 
