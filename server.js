@@ -37,22 +37,59 @@ app.use(passport.session());
 // Initialize MongoDB connection
 const db = mongoose.connection;
 db.on('Database error::::', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
+db.once('open', function () {
     console.log('Connected to database')
 })
 
-// Start socket server
-const server = http.Server(app)
-socketServer(server)
-// Start http controllers
-controllers(app)
+if (process.env.NODE_ENV !== 'production') {
+    // Dev only
+    const https = require('https');
+    const fs = require('fs');
 
-const PORT = 3000;
-server.listen(process.env.PORT || PORT, () => {
-    console.log(`Listening at http://localhost:${PORT}`)
-    // Start MongoDB connection
-    mongoose.connect(`mongodb://${process.env.IP || 'localhost'}/test`);
-})
+    app.use(function (req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+
+    controllers(app)
+
+    const options = {
+        key: fs.readFileSync('./.cert/localhost.key'),
+        cert: fs.readFileSync('./.cert/localhost.crt'),
+    };
+
+    var devServer = https.createServer(options, app)
+    
+    // socketServer(devServer)
+
+    devServer.listen(3000, function () {
+        console.log("server started at port 3000");
+        mongoose.connect(`mongodb://${process.env.IP || 'localhost'}/test`);
+    });
+
+} else {
+
+    const server = http.Server(app)
+    // Start socket server
+    socketServer(server)
+    // Init http controllers
+    controllers(app)
+
+    const PORT = 3000;
+    // Start express 
+    server.listen(process.env.PORT || PORT, () => {
+        console.log(`Listening at http://localhost:${PORT}`)
+        // Start MongoDB connection
+        mongoose.connect(`mongodb://${process.env.IP || 'localhost'}/test`);
+    })
+
+}
+
+
+
+
+
 
 // Export for testing
 module.exports = app;
