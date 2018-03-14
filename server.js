@@ -18,19 +18,34 @@ const socketServer = require('./socket-server');
 const app = express();
 
 // Apply middleware
+
 app.use(express.static(__dirname + "/public"));
+app.use(cookieParser(process.env.SECRET));
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text());
 app.use(bodyParser.json({ type: "application/vnd.api+json" }));
-
-// Apply Passport middleware
-app.use(cookieParser(process.env.SECRET));
 app.use(session({
     secret: process.env.SECRET,
-    resave: false,
-    saveUninitialized: true
+    resave: true,
+    saveUninitialized: true,
+    domain: 'localhost',
+    maxAge: 1000 * 60 * 60 * 24 * 30
 }));
+
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header("Access-Control-Allow-Origin", "http://localhost:9001");
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'authorization, X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    if ('OPTIONS' == req.method) {
+         res.sendStatus(200);
+     } else {
+         next();
+     }
+});
+
+// Apply Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -45,12 +60,6 @@ if (process.env.NODE_ENV !== 'production') {
     // Dev only
     const https = require('https');
     const fs = require('fs');
-
-    app.use(function (req, res, next) {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        next();
-    });
 
     controllers(app)
 
