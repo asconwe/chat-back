@@ -1,9 +1,9 @@
-const siteController = require('./site-controller');
-const repController = require('./rep-controller');
 const auth = require('./auth');
+const registration = require('./registration')
+const dashboard = require('./dashboard')
 
 module.exports = (app) => {
     auth(app);
-    siteController(app);
-    repController(app);
+    registration(app);    
+    dashboard(app);
 }
