@@ -2,28 +2,33 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 
 const USERNAME_PASSWORD_ERR = 'Incorrect username or password.'
+const NOT_VERIFIED_ERR = 'You need to verify your email address.'
 
 // User model
-const { Rep } = require('../../../models/Rep');
+const { User } = require('../../../models/User');
 
 module.exports = new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
-    const query = Rep.where({ email })
-    query.findOne((err, rep) => {
+    const query = User.where({ email })
+    query.findOne((err, user) => {
             if (err) { return done(err); }
 
             // Invalid email 
-            if (!rep) {
-                return done(null, false, { message: USERNAME_PASSWORD_ERR });
+            if (!user) {
+                return done(null, false, USERNAME_PASSWORD_ERR);
             }
-            rep.validatePassword(password, (isValid) => {
+            user.validatePassword(password, (isValid) => {
 
                 // Invalid password
                 if (!isValid) {
-                    return done(null, false, { message: USERNAME_PASSWORD_ERR });
+                    return done(null, false, USERNAME_PASSWORD_ERR);
+                }
+
+                if (!user.verified) {
+                    return done(null, false, NOT_VERIFIED_ERR)
                 }
 
                 // Successful login attempt
-                return done(null, rep); // Success
+                return done(null, user); // Success
             })
         })
 })

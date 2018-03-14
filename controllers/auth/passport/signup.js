@@ -1,9 +1,15 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const {Rep} = require('../../../models/Rep');
+const { User } = require('../../../models/User');
 
-module.exports = new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
-    const newRep = new Rep({ email: email.trim(), password: password.trim(), verified: false });
+module.exports = new LocalStrategy({ usernameField: 'email', passReqToCallback: true }, (req, email, password, done) => {
+    const newRep = new User({ 
+        email: email.trim(), 
+        password: password.trim(), 
+        verified: false, 
+        firstName: req.body.firstName, 
+        lastName: req.body.lastName,
+    });
     return newRep.save()
         .then((user) => {
             return done(null, user);

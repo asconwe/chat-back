@@ -1,34 +1,39 @@
 'use strict'
 
+const EMAIL_ERROR = 'Please provide a valid email address.';
+const PASSWORD_ERROR = 'Password must be at least 8 characters long.';
+
+function validateSignupPassword(password) {
+    return (typeof password === 'string' && password.trim().length > 7)
+}
+
+function validateSignupEmail(email) {
+    return (
+        typeof email === 'string' && 
+        email.trim().length > 5 && 
+        email.match(/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)
+    );
+}
+
 function validateSignupForm(payload) {
-    const errors = {};
-    let isFormValid = true;
-    let message = '';
-
-    if (!payload || typeof payload.email !== 'string' || payload.email.trim().length < 6 || !payload.email.includes('@')) {
-        isFormValid = false;
-        errors.email = 'Please provide a correct email address.';
-    }
-
-    if (!payload || typeof payload.password !== 'string' || payload.password.trim().length < 8) {
-        isFormValid = false;
-        errors.password = 'Password must have at least 8 characters.';
-    }
-
-    // if (!payload || typeof payload.name !== 'string' || payload.name.trim().length === 0) {
-    //     isFormValid = false;
-    //     errors.name = 'Please provide your name.';
-    // }
-
-    if (!isFormValid) {
-        message = 'Check the form for errors.';
+    const payloadIsPresent = payload && true;
+    const emailIsValid = validateSignupEmail(payload.email);
+    const passwordIsValid = validateSignupPassword(payload.password);
+    const success = payloadIsPresent && emailIsValid && passwordIsValid;
+    const errors = {
+        email: !emailIsValid && EMAIL_ERROR,
+        password: !passwordIsValid && PASSWORD_ERROR
     }
 
     return {
-        success: isFormValid,
-        message,
-        errors
+        success,
+        errors: !success && errors
     };
 }
 
-module.exports = validateSignupForm;
+module.exports = {
+    validateSignupForm,
+    validateSignupEmail,
+    validateSignupPassword
+};
+

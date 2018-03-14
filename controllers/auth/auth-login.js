@@ -1,18 +1,18 @@
 const passport = require('passport');
 const LocalLoginStrategy = require('./passport/login');
-const validateLoginForm = require('./passport/validate-login');
+const { validateLoginForm } = require('./passport/validate-login');
 
-const {Rep} = require('../../models/Rep');
+const { User } = require('../../models/User');
 
 const LOCAL_LOGIN = 'local-login';
 
-passport.serializeUser(function (rep, done) {
-    done(null, rep._id);
+passport.serializeUser(function (user, done) {
+    done(null, user.id);
 });
 
 passport.deserializeUser(function (id, done) {
-    Rep.findById(id, function (err, rep) {
-        done(err, rep);
+    User.findById(id, function (err, user) {
+        done(err, user);
     });
 });
 
@@ -26,30 +26,34 @@ module.exports = (app) => {
         if (!validationResult.success) {
             return res.status(400).json({
                 success: false,
-                message: validationResult.message,
                 errors: validationResult.errors
             });
         }
-        const authenticateWithLocalStrategy =  passport.authenticate(LOCAL_LOGIN, (err, rep) => {
+        
+        const authenticateWithLocalStrategy = passport.authenticate(LOCAL_LOGIN, {session: true}, (err, user, message) => {
             // Authentication failed
             if (err) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'There was an issue accessing the database, please try again later'
-                });
-            }
-            if (!rep) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Username and password did not match an account in our database'
+                    error: {
+                        authentication: message
+                    }
+                });
+            }
+            if (!user) {
+                return res.status(400).json({
+                    success: false,
+                    error: { 
+                        authentication: message
+                    }
                 });
             }
 
             // Authentication successful
-            req.login(rep, {}, (data) => {
+            req.login(user, {}, () => {
                 return res.status(200).json({
                     success: true,
-                    message: 'You are logged in'
+                    message: 'You are logged in!'
                 });
             });
         })

@@ -1,30 +1,33 @@
 'use strict'
 
-const validateLoginForm = (payload) => {
-    const errors = {};
-    let isFormValid = true;
-    let message = '';
+const EMAIL_ERROR = 'An email is required to sign in.';
+const PASSWORD_ERROR = 'A password is required to sign in.';
 
-    if (!payload || typeof payload.email !== 'string' || payload.email.trim().length === 0) {
-        isFormValid = false;
-        errors.email = 'Please provide your email address.';
-    }
+function validateStringIsPresent(str) {
+    return typeof str === 'string' && str.trim().length >= 0
+}
 
-    if (!payload || typeof payload.password !== 'string' || payload.password.trim().length === 0) {
-        isFormValid = false;
-        errors.password = 'Please provide your password.';
-    }
+const validateLoginEmail = validateStringIsPresent;
+const validateLoginPassword = validateStringIsPresent;
 
-    if (!isFormValid) {
-        message = 'Check the form for errors.';
+function validateLoginForm(payload) {
+    const payloadIsPresent = payload && true;
+    const emailIsValid = validateLoginEmail(payload.email);
+    const passwordIsValid = validateLoginPassword(payload.password);
+    const success = payloadIsPresent && emailIsValid && passwordIsValid;
+    const errors = {
+        email: !emailIsValid && EMAIL_ERROR,
+        password: !passwordIsValid && PASSWORD_ERROR
     }
 
     return {
-        success: isFormValid,
-        message,
-        errors
-
+        success,
+        errors: !success && errors
     };
 }
 
-module.exports = validateLoginForm;
+module.exports = {
+    validateLoginEmail,
+    validateLoginPassword,
+    validateLoginForm
+};
