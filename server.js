@@ -8,7 +8,11 @@ const http = require('http');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const passport = require('passport');
-const session = require('cookie-session');
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
+
+const db = mongoose.connection;
+const sessionStore =  new MongoStore({ mongooseConnection: db });
 
 // App control
 const controllers = require('./controllers');
@@ -30,7 +34,8 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
     domain: 'localhost',
-    maxAge: 1000 * 60 * 60 * 24 * 30
+    maxAge: 1000 * 60 * 60 * 24 * 30,
+    store: sessionStore,
 }));
 
 app.use(function(req, res, next) {
@@ -50,7 +55,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Initialize MongoDB connection
-const db = mongoose.connection;
 db.on('Database error::::', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
     console.log('Connected to database')
@@ -61,6 +65,7 @@ if (process.env.NODE_ENV !== 'production') {
     const https = require('https');
     const fs = require('fs');
 
+    // Init http controllers
     controllers(app)
 
     const options = {
@@ -70,7 +75,7 @@ if (process.env.NODE_ENV !== 'production') {
 
     var devServer = https.createServer(options, app)
     
-    // socketServer(devServer)
+    socketServer(devServer, sessionStore);
 
     devServer.listen(3000, function () {
         console.log("server started at port 3000");
