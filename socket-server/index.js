@@ -11,16 +11,27 @@ function createSiteNameSpace(namespace, server, sessionStore) {
         key: 'connect.sid',
         secret: process.env.SECRET,
         store: sessionStore,
+        fail: ({ user }, message, critical, accept) => {
+            console.log('=======data===========\n', user)
+            if (user.logged_in === false) {
+                return accept();
+            }
+            return accept(new Error(message));
+        }
     })
     const nio = io.of(namespace)
     nio.use(ioAuth);
+    nio.use((socket, next) => {
+        console.log(socket)
+        next();
+    })
     return nio;
 }
 
 function connectSocket(nio) {
     nio.on('connection', (socket) => {
         const { user } = socket.request;
-        if (user) {
+        if (user.logged_in) {
             // do rep things, like validate the site
             console.log(`Rep ${user.firstName} ${user.lastName} connected`);
             const siteId = user.sites[0];
@@ -30,7 +41,7 @@ function connectSocket(nio) {
             });
         }
         else {
-            console.log(`End user connected`);
+            console.log(`End user connected in room:`, socket.id);
         }
     });
 }
