@@ -7,6 +7,9 @@ const { server, sessionStore } = require('../initServer');
 
 function createSiteNameSpace(namespace) {
     const io = socket_io(server)
+    // Node caps listeners at 10 to prevent memory leaks 
+    // - we need to add a new listener for every site that is created or will hit that limit
+    server.setMaxListeners(server.listenerCount('listening') + 1);
     const ioAuth = passportSocketIo.authorize({
         cookieParser,
         key: 'connect.sid',
@@ -55,7 +58,8 @@ function connectAllSites() {
 }
 
 function connectNewSite(site_id) {
-    const nio = createSiteNameSpace(site_id)
+    const nio = createSiteNameSpace(site_id);
+    connectSocket(nio)
 }
 
 module.exports = {
