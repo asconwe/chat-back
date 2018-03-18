@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 const { Site } = require('../../models/Site')
 const { User } = require('../../models/User')
 
+const { connectNewSite } = require('../../socket-server');
+
 module.exports = (app) => {
   app.post('/api/sites/', (req, res) => {
-    if (!req.user) return res.status(404).json({ 
+    if (!req.user) return res.status(404).json({
       success: false,
-      error: { authentication: 'Authentication required.' } 
+      error: { authentication: 'Authentication required.' }
     });
 
     const { name, address } = req.body;
@@ -29,6 +31,7 @@ module.exports = (app) => {
         return newSite.save()
       })
       .then(savedSite => {
+        connectNewSite(newSite._id.toString())
         return res.status(200).json({
           success: true,
           message: 'New site created',
@@ -36,7 +39,7 @@ module.exports = (app) => {
         })
       })
       .catch(err => {
-        console.log(err);
+        console.error(err);
         return res.status(400).json(err);
       })
   })
