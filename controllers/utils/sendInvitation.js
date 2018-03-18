@@ -32,7 +32,7 @@ module.exports = (site_id, siteName, email, firstName, siteToUpdate) => {
         resolve(siteToUpdate)
       })
       .catch((err) => {
-        rejectI(err)
+        reject(err)
       })
   })
 }
