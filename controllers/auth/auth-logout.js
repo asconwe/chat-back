@@ -1,6 +1,9 @@
 module.exports = (app) => {
     app.get('/auth/logout', (req, res) => {
         req.logout();
-        res.status(200).json({ logout: "success" });
+        if (req.isAuthenticated()) {
+            return res.status(400).json({ success: false, errors: { logout: 'Logout failure'} })
+        }
+        return res.status(200).json({ success: true })
     });
 }
