@@ -52,7 +52,7 @@ module.exports = (app) => {
                     });
                 })
                 .catch(err => {
-                    console.log(err);
+                    console.error(err);
                     if (err.type = 'email') {
                         return res.status(202).json({
                             success: false,
