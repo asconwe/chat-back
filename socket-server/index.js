@@ -3,7 +3,8 @@ const passportSocketIo = require('passport.socketio');
 const { Site } = require('../models/Site')
 const socket_io = require('socket.io');
 const { server, sessionStore } = require('../initServer');
-
+const endUserSocketController = require('./endUserSocketController');
+const repSocketController = require('./repSocketController');
 
 function createSiteNameSpace(namespace) {
     const io = socket_io(server)
@@ -32,14 +33,10 @@ function connectSocket(nio) {
         const { user } = socket.request;
         if (user.logged_in) {
             // do rep things, like validate the site
-            console.log(`Rep ${user.firstName} ${user.lastName} connected`);
-            const siteId = user.sites[0];
-            socket.on('chat message', (socket) => {
-                console.log('socket', socket);
-            });
+            repSocketController(user, socket, nio);
         }
         else {
-            console.log(`End user connected in room:`, socket.id);
+            endUserSocketController(nio, socket);
         }
     });
 }
